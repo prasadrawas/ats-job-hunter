@@ -1,9 +1,10 @@
 ---
 name: ats-job-hunter
 description: >
-  Automate job hunting across ATS platforms (Greenhouse, Lever, Ashby).
-  Fetches open jobs, scores them against your resume, tailors your resume
-  using Gemini AI, generates ATS-friendly LaTeX PDF, and applies automatically.
+  Automate job hunting across 10 ATS platforms (Greenhouse, Lever, Ashby,
+  Workday, SmartRecruiters, BambooHR, Recruitee, Breezy HR, Rippling, Taleo).
+  Fetches open jobs, scores them against your resume, tailors your resume,
+  generates ATS-friendly LaTeX PDF, and applies automatically.
   Trigger on: "find jobs", "hunt jobs", "apply to jobs", "match resume",
   "job search", "ATS apply", "tailor resume", "write application email",
   "generate email"
@@ -20,7 +21,7 @@ requires:
 
 ## Purpose
 End-to-end job application automation:
-1. Fetch open positions from ATS platforms (Greenhouse, Lever, Ashby) via their public APIs
+1. Fetch open positions from 10 ATS platforms via their public APIs
 2. Score each job against the user's master resume using semantic matching
 3. Rank jobs by match score
 4. Tailor the resume to the top-matching JD using Google Gemini AI
@@ -43,11 +44,18 @@ End-to-end job application automation:
 3. The master resume is the **complete superset** of all experience, skills, and projects — never modify it directly
 
 ### Step 2: Fetch Jobs from ATS Platforms (parallel + cached)
-1. Run: `python {{SKILL_PATH}}/scripts/fetch_jobs.py --platforms greenhouse,lever,ashby`
+1. Run: `python {{SKILL_PATH}}/scripts/fetch_jobs.py`
 2. The script queries these public API endpoints **in parallel** (5 threads):
    - **Greenhouse**: `https://boards-api.greenhouse.io/v1/boards/{board_token}/jobs`
    - **Lever**: `https://api.lever.co/v0/postings/{company}?mode=json`
    - **Ashby**: `https://api.ashbyhq.com/posting-api/job-board/{board_slug}`
+   - **Workday**: `https://{tenant}.wdN.myworkdayjobs.com/wday/cxs/{tenant}/{site}/jobs`
+   - **SmartRecruiters**: `https://api.smartrecruiters.com/v1/companies/{company}/postings`
+   - **BambooHR**: `https://{company}.bamboohr.com/careers/list`
+   - **Recruitee**: `https://{company}.recruitee.com/api/offers/`
+   - **Breezy HR**: `https://{company}.breezy.hr/json`
+   - **Rippling**: `https://api.rippling.com/platform/api/ats/v2/board/{slug}/jobs`
+   - **Taleo**: `https://{tenant}.taleo.net/careersection/rest/jobboard/searchjobs`
 3. **Caching**: If jobs.json is less than 6 hours old, skip fetching entirely (use `--cache-hours 0` to force refresh)
 4. User can specify target companies in `{{WORKSPACE_PATH}}/config/companies.yaml`
 5. Automatic deduplication removes same job posted on multiple boards
