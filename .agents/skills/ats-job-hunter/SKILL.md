@@ -36,6 +36,60 @@ End-to-end job application automation:
 - LaTeX installed: `brew install --cask mactex` or `brew install basictex`
 - AI capabilities are provided by Antigravity (no separate API key needed)
 
+## Commands
+
+Users can invoke these slash commands for quick access to each pipeline stage:
+
+### `/hunt [query]`
+**Full pipeline**: Fetch jobs → Score → Present top matches.
+- Example: `/hunt`, `/hunt react engineer`, `/hunt backend python remote`
+- Fetches from all configured ATS platforms + job boards
+- Scores and ranks against master resume
+- Presents top 10 matches with APPLY/MAYBE/SKIP recommendations
+- If `[query]` is provided, also searches job board aggregators with that query
+
+### `/tailor <job_id>`
+**Tailor resume** for a specific job from scored results.
+- Example: `/tailor 5790627004`, `/tailor ramp_4859cd5e`
+- Generates ATS-optimized LaTeX PDF tailored to the job description
+- Runs ATS compliance validation
+- Shows tailoring diff for user approval
+
+### `/apply <job_id|top N>`
+**Apply** to one or more jobs (tailor + validate + answer questions + submit).
+- Example: `/apply 5790627004`, `/apply top 3`, `/apply all-recommended`
+- Runs full tailoring, validation, question answering, and submission
+- Always asks for user confirmation before submitting
+- Dry-run mode by default
+
+### `/cover-letter <job_id>`
+**Generate cover letter** for a specific job.
+- Example: `/cover-letter 5790627004`
+- Only needed if the application form requires one
+- Outputs both `.txt` and `.pdf`
+
+### `/email <job_id>`
+**Generate application email** for a specific job.
+- Example: `/email 5790627004`
+- Short 5-7 line email with metrics mapped to JD
+- Only when JD says to email the resume
+
+### `/score`
+**Re-score** existing fetched jobs (skip fetching).
+- Example: `/score`, `/score --force-tfidf`
+- Useful after updating preferences.yaml or master resume
+- Uses cached jobs.json
+
+### `/status`
+**Show application status** — what's been applied, pending, or failed.
+- Reads from `output/applications_log.json`
+- Shows summary: applied count, success/failure, pending reviews
+
+### `/refresh`
+**Force-refresh** job listings (ignore cache).
+- Equivalent to fetching with `--cache-hours 0`
+- Then re-scores all fetched jobs
+
 ## Instructions
 
 ### Step 1: Load Master Resume
