@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
-"""Fetch open jobs from ATS platforms (Greenhouse, Lever, Ashby, LinkedIn) via public APIs.
+"""Fetch open jobs from ATS platforms and job boards via public APIs.
 
+Supports 10 ATS platforms (company-specific) and 8 job board aggregators (global search).
 Optimized: parallel fetching + caching to avoid redundant API calls.
 """
 
@@ -418,6 +419,347 @@ FETCHERS = {
 }
 
 
+# ---------------------------------------------------------------------------
+# Job Board Aggregator Fetchers (global search, no company token needed)
+# ---------------------------------------------------------------------------
+
+def fetch_remoteok_jobs(query: str = "") -> list[dict]:
+    """Fetch from RemoteOK — free, no auth, returns JSON array."""
+    url = "https://remoteok.com/api"
+    params = {}
+    if query:
+        params["tags"] = query
+    try:
+        resp = requests.get(url, params=params, timeout=30,
+                            headers={"User-Agent": "ATS-Job-Hunter/1.0"})
+        resp.raise_for_status()
+        data = resp.json()
+        # First element is metadata, skip it
+        jobs = data[1:] if len(data) > 1 else []
+        return [
+            {
+                "id": str(job.get("id", "")),
+                "title": job.get("position", ""),
+                "location": "Remote",
+                "description": clean_html(job.get("description", "")),
+                "url": job.get("url", f"https://remoteok.com/remote-jobs/{job.get('id', '')}"),
+                "department": "",
+                "platform": "remoteok",
+                "company_token": job.get("company", "").lower().replace(" ", "-"),
+                "company_name": job.get("company", ""),
+                "updated_at": job.get("date", ""),
+                "salary_min": job.get("salary_min", ""),
+                "salary_max": job.get("salary_max", ""),
+                "tags": job.get("tags", []),
+            }
+            for job in jobs
+        ]
+    except requests.RequestException as e:
+        print(f"  Error fetching RemoteOK: {e}")
+        return []
+
+
+def fetch_himalayas_jobs(query: str = "", limit: int = 50) -> list[dict]:
+    """Fetch from Himalayas — free, no auth, cursor-paginated."""
+    base_url = "https://himalayas.app/jobs/api"
+    try:
+        all_jobs = []
+        cursor = None
+        fetched = 0
+
+        while fetched < limit:
+            params = {"limit": min(20, limit - fetched)}
+            if query:
+                params["keyword"] = query
+            if cursor:
+                params["cursor"] = cursor
+
+            resp = requests.get(base_url, params=params, timeout=30)
+            resp.raise_for_status()
+            data = resp.json()
+            page_jobs = data.get("jobs", [])
+            if not page_jobs:
+                break
+
+            for job in page_jobs:
+                all_jobs.append({
+                    "id": str(job.get("id", "")),
+                    "title": job.get("title", ""),
+                    "location": job.get("location", "Remote"),
+                    "description": clean_html(job.get("description", "")),
+                    "url": job.get("applicationUrl", job.get("url", "")),
+                    "department": job.get("category", ""),
+                    "platform": "himalayas",
+                    "company_token": job.get("companySlug", ""),
+                    "company_name": job.get("companyName", ""),
+                    "updated_at": job.get("pubDate", ""),
+                    "salary_min": job.get("minSalary", ""),
+                    "salary_max": job.get("maxSalary", ""),
+                })
+
+            cursor = data.get("cursor")
+            fetched += len(page_jobs)
+            if not cursor:
+                break
+            time.sleep(0.5)
+
+        return all_jobs
+    except requests.RequestException as e:
+        print(f"  Error fetching Himalayas: {e}")
+        return []
+
+
+def fetch_arbeitnow_jobs(query: str = "", limit: int = 100) -> list[dict]:
+    """Fetch from Arbeitnow — free, no auth, paginated."""
+    try:
+        all_jobs = []
+        page = 1
+
+        while len(all_jobs) < limit:
+            resp = requests.get(f"https://arbeitnow.com/api/job-board-api?page={page}", timeout=30)
+            resp.raise_for_status()
+            data = resp.json()
+            page_jobs = data.get("data", [])
+            if not page_jobs:
+                break
+
+            for job in page_jobs:
+                if query and query.lower() not in (job.get("title", "") + " " + job.get("description", "")).lower():
+                    continue
+                all_jobs.append({
+                    "id": job.get("slug", ""),
+                    "title": job.get("title", ""),
+                    "location": job.get("location", ""),
+                    "description": clean_html(job.get("description", "")),
+                    "url": job.get("url", ""),
+                    "department": ", ".join(job.get("tags", [])),
+                    "platform": "arbeitnow",
+                    "company_token": job.get("company_name", "").lower().replace(" ", "-"),
+                    "company_name": job.get("company_name", ""),
+                    "updated_at": job.get("created_at", ""),
+                    "remote": job.get("remote", False),
+                })
+
+            if not data.get("links", {}).get("next"):
+                break
+            page += 1
+            time.sleep(0.5)
+
+        return all_jobs[:limit]
+    except requests.RequestException as e:
+        print(f"  Error fetching Arbeitnow: {e}")
+        return []
+
+
+def fetch_jobicy_jobs(query: str = "", geo: str = "", limit: int = 50) -> list[dict]:
+    """Fetch from Jobicy — free, no auth, last 7 days of remote jobs."""
+    params = {"count": min(limit, 50)}
+    if query:
+        params["tag"] = query
+    if geo:
+        params["geo"] = geo
+    try:
+        resp = requests.get("https://jobicy.com/api/v2/remote-jobs", params=params, timeout=30)
+        resp.raise_for_status()
+        data = resp.json()
+        return [
+            {
+                "id": str(job.get("id", "")),
+                "title": job.get("jobTitle", ""),
+                "location": job.get("jobGeo", "Remote"),
+                "description": clean_html(job.get("jobDescription", "")),
+                "url": job.get("url", ""),
+                "department": job.get("jobIndustry", [""])[0] if job.get("jobIndustry") else "",
+                "platform": "jobicy",
+                "company_token": job.get("companyName", "").lower().replace(" ", "-"),
+                "company_name": job.get("companyName", ""),
+                "updated_at": job.get("pubDate", ""),
+                "salary_min": job.get("annualSalaryMin", ""),
+                "salary_max": job.get("annualSalaryMax", ""),
+                "job_type": job.get("jobType", ""),
+            }
+            for job in data.get("jobs", [])
+        ]
+    except requests.RequestException as e:
+        print(f"  Error fetching Jobicy: {e}")
+        return []
+
+
+def fetch_workingnomads_jobs(query: str = "") -> list[dict]:
+    """Fetch from Working Nomads — free, no auth."""
+    try:
+        resp = requests.get("https://www.workingnomads.com/api/exposed_jobs/", timeout=30)
+        resp.raise_for_status()
+        jobs = resp.json()
+        results = []
+        for job in jobs:
+            title = job.get("title", "")
+            desc = job.get("description", "")
+            if query and query.lower() not in (title + " " + desc).lower():
+                continue
+            results.append({
+                "id": str(job.get("id", "")),
+                "title": title,
+                "location": job.get("location", "Remote"),
+                "description": clean_html(desc),
+                "url": job.get("url", ""),
+                "department": job.get("category_name", ""),
+                "platform": "workingnomads",
+                "company_token": job.get("company_name", "").lower().replace(" ", "-"),
+                "company_name": job.get("company_name", ""),
+                "updated_at": job.get("pub_date", ""),
+            })
+        return results
+    except requests.RequestException as e:
+        print(f"  Error fetching WorkingNomads: {e}")
+        return []
+
+
+def fetch_remotive_jobs(query: str = "", limit: int = 50) -> list[dict]:
+    """Fetch from Remotive — free, no auth, ~35 jobs, 24h delayed."""
+    params = {"limit": limit}
+    if query:
+        params["search"] = query
+    try:
+        resp = requests.get("https://remotive.com/api/remote-jobs", params=params, timeout=30)
+        resp.raise_for_status()
+        data = resp.json()
+        return [
+            {
+                "id": str(job.get("id", "")),
+                "title": job.get("title", ""),
+                "location": job.get("candidate_required_location", "Remote"),
+                "description": clean_html(job.get("description", "")),
+                "url": job.get("url", ""),
+                "department": job.get("category", ""),
+                "platform": "remotive",
+                "company_token": job.get("company_name", "").lower().replace(" ", "-"),
+                "company_name": job.get("company_name", ""),
+                "updated_at": job.get("publication_date", ""),
+                "job_type": job.get("job_type", ""),
+                "salary": job.get("salary", ""),
+            }
+            for job in data.get("jobs", [])
+        ]
+    except requests.RequestException as e:
+        print(f"  Error fetching Remotive: {e}")
+        return []
+
+
+def fetch_themuse_jobs(query: str = "", category: str = "Engineering", limit: int = 100) -> list[dict]:
+    """Fetch from The Muse — free, no auth, paginated."""
+    try:
+        all_jobs = []
+        page = 0
+
+        while len(all_jobs) < limit:
+            params = {"page": page}
+            if category:
+                params["category"] = category
+            resp = requests.get("https://www.themuse.com/api/public/jobs", params=params, timeout=30)
+            resp.raise_for_status()
+            data = resp.json()
+            results = data.get("results", [])
+            if not results:
+                break
+
+            for job in results:
+                locations = [loc.get("name", "") for loc in job.get("locations", [])]
+                all_jobs.append({
+                    "id": str(job.get("id", "")),
+                    "title": job.get("name", ""),
+                    "location": "; ".join(locations) if locations else "",
+                    "description": clean_html(job.get("contents", "")),
+                    "url": job.get("refs", {}).get("landing_page", ""),
+                    "department": ", ".join(cat.get("name", "") for cat in job.get("categories", [])),
+                    "platform": "themuse",
+                    "company_token": job.get("company", {}).get("short_name", ""),
+                    "company_name": job.get("company", {}).get("name", ""),
+                    "updated_at": job.get("publication_date", ""),
+                    "levels": [lvl.get("name", "") for lvl in job.get("levels", [])],
+                })
+
+            page += 1
+            if page >= data.get("page_count", 1):
+                break
+            time.sleep(0.3)
+
+        return all_jobs[:limit]
+    except requests.RequestException as e:
+        print(f"  Error fetching TheMuse: {e}")
+        return []
+
+
+def fetch_hn_whos_hiring(query: str = "") -> list[dict]:
+    """Fetch from Hacker News 'Who is hiring?' monthly thread via Algolia API."""
+    try:
+        # Find the latest "Who is hiring?" thread
+        search_resp = requests.get(
+            "https://hn.algolia.com/api/v1/search_by_date",
+            params={"tags": "story", "query": "Ask HN Who is hiring", "hitsPerPage": 1},
+            timeout=15,
+        )
+        search_resp.raise_for_status()
+        hits = search_resp.json().get("hits", [])
+        if not hits:
+            print("  HN: No 'Who is hiring?' thread found")
+            return []
+
+        story_id = hits[0]["objectID"]
+        story_title = hits[0].get("title", "")
+        print(f"  HN: Found thread '{story_title}' (ID: {story_id})")
+
+        # Fetch all children (job comments)
+        item_resp = requests.get(
+            f"https://hn.algolia.com/api/v1/items/{story_id}",
+            timeout=30,
+        )
+        item_resp.raise_for_status()
+        item = item_resp.json()
+        children = item.get("children", [])
+
+        jobs = []
+        for comment in children:
+            text = comment.get("text", "")
+            if not text or len(text) < 20:
+                continue
+            if query and query.lower() not in text.lower():
+                continue
+
+            # Try to extract company name from first line
+            first_line = clean_html(text).split(".")[0].split("|")[0].strip()
+            company = first_line[:60] if first_line else "Unknown"
+
+            jobs.append({
+                "id": str(comment.get("id", "")),
+                "title": first_line[:100],
+                "location": "See posting",
+                "description": clean_html(text),
+                "url": f"https://news.ycombinator.com/item?id={comment.get('id', '')}",
+                "department": "",
+                "platform": "hackernews",
+                "company_token": company.lower().replace(" ", "-")[:30],
+                "company_name": company,
+                "updated_at": comment.get("created_at", ""),
+            })
+        return jobs
+    except requests.RequestException as e:
+        print(f"  Error fetching HN Who's Hiring: {e}")
+        return []
+
+
+JOB_BOARD_FETCHERS = {
+    "remoteok": fetch_remoteok_jobs,
+    "himalayas": fetch_himalayas_jobs,
+    "arbeitnow": fetch_arbeitnow_jobs,
+    "jobicy": fetch_jobicy_jobs,
+    "workingnomads": fetch_workingnomads_jobs,
+    "remotive": fetch_remotive_jobs,
+    "themuse": fetch_themuse_jobs,
+    "hackernews": fetch_hn_whos_hiring,
+}
+
+
 def deduplicate_jobs(jobs: list[dict]) -> list[dict]:
     seen = set()
     unique = []
@@ -457,6 +799,13 @@ def main():
                         help="Use cached jobs if less than N hours old (0 to disable)")
     parser.add_argument("--max-workers", type=int, default=5,
                         help="Max parallel fetch threads (default: 5)")
+    # Job board aggregator options
+    parser.add_argument("--job-boards", type=str, default=None,
+                        help="Comma-separated job boards to search (remoteok,himalayas,arbeitnow,jobicy,workingnomads,remotive,themuse,hackernews). Use 'all' for all.")
+    parser.add_argument("--job-board-query", type=str, default=None,
+                        help="Search query for job board aggregators (e.g. 'python engineer')")
+    parser.add_argument("--job-board-limit", type=int, default=50,
+                        help="Max jobs per job board (default: 50)")
     # LinkedIn options
     parser.add_argument("--linkedin-query", type=str, default=None,
                         help="LinkedIn search keywords (e.g. 'python developer'). Enables LinkedIn fetching.")
@@ -495,7 +844,15 @@ def main():
         for token in tokens:
             fetch_tasks.append((platform, token))
 
-    if not fetch_tasks and not args.linkedin_query:
+    # Parse job board selection
+    job_board_names = []
+    if args.job_boards:
+        if args.job_boards.lower() == "all":
+            job_board_names = list(JOB_BOARD_FETCHERS.keys())
+        else:
+            job_board_names = [b.strip() for b in args.job_boards.split(",") if b.strip() in JOB_BOARD_FETCHERS]
+
+    if not fetch_tasks and not job_board_names and not args.linkedin_query:
         print("No fetch tasks to run.")
         return
 
@@ -524,6 +881,33 @@ def main():
 
     elapsed = time.time() - start_time
     print(f"\nFetched {len(all_jobs)} jobs from ATS platforms in {elapsed:.1f}s")
+
+    # Job board aggregator fetch (if configured)
+    if job_board_names:
+        board_query = args.job_board_query or ""
+        board_limit = args.job_board_limit
+        print(f"\nFetching from {len(job_board_names)} job boards{f' (query: {board_query!r})' if board_query else ''}...")
+
+        with ThreadPoolExecutor(max_workers=min(len(job_board_names), 5)) as executor:
+            future_to_board = {}
+            for board_name in job_board_names:
+                fetcher = JOB_BOARD_FETCHERS[board_name]
+                if board_name in ("himalayas", "arbeitnow", "themuse"):
+                    future = executor.submit(fetcher, board_query, board_limit)
+                elif board_name == "jobicy":
+                    future = executor.submit(fetcher, board_query, "", board_limit)
+                else:
+                    future = executor.submit(fetcher, board_query)
+                future_to_board[future] = board_name
+
+            for future in as_completed(future_to_board):
+                board_name = future_to_board[future]
+                try:
+                    jobs = future.result()
+                    all_jobs.extend(jobs)
+                    print(f"  {board_name}: {len(jobs)} jobs")
+                except Exception as e:
+                    print(f"  {board_name}: ERROR — {e}")
 
     # LinkedIn fetch (if configured)
     if args.linkedin_query:

@@ -9,7 +9,7 @@
 [![AI: Google Gemini](https://img.shields.io/badge/AI-Google%20Gemini%202.0-8E75C4.svg?style=for-the-badge&logo=google&logoColor=white)](https://ai.google.dev/)
 [![Typesetting: Tectonic](https://img.shields.io/badge/Typesetting-Tectonic%20/%20LaTeX-coral.svg?style=for-the-badge&logo=latex&logoColor=white)](https://tectonic-typesetting.github.io/)
 [![Platforms](https://img.shields.io/badge/Platforms-macOS%20|%20Linux%20|%20Windows-lightgrey.svg?style=for-the-badge)](#prerequisites)
-[![Supported ATS](https://img.shields.io/badge/ATS-10+_Platforms%20Supported-success.svg?style=for-the-badge)](#supported-platforms)
+[![Supported ATS](https://img.shields.io/badge/Platforms-10_ATS_+_8_Job_Boards-success.svg?style=for-the-badge)](#supported-platforms)
 
 <br/>
 
@@ -47,9 +47,9 @@
 
 ---
 
-## 🌐 Supported ATS Platforms
+## 🌐 Supported Platforms
 
-ATS Job Hunter natively fetches, parses, and matches against postings across 10+ modern ATS platforms:
+### ATS Platforms (Company-Specific — configured in `companies.yaml`)
 
 | Platform | Type | Example Target Companies |
 | :--- | :--- | :--- |
@@ -64,6 +64,31 @@ ATS Job Hunter natively fetches, parses, and matches against postings across 10+
 | **Rippling** | ATS v2 Board API | Fast-moving YC & venture-backed tech startups |
 | **Taleo** | Enterprise Career Section API | Global enterprise companies |
 | **LinkedIn** | Public Guest Job Search | Targeted local & global job postings |
+
+### Job Board Aggregators (Global Search — no config needed, use `--job-boards`)
+
+| Platform | API | Best For |
+| :--- | :--- | :--- |
+| **RemoteOK** | `remoteok.com/api` | Remote tech jobs, tag-filtered |
+| **Himalayas** | `himalayas.app/jobs/api` | Largest remote feed (95k+ listings), salary data |
+| **Arbeitnow** | `arbeitnow.com/api/job-board-api` | European tech jobs, visa sponsorship filter |
+| **Jobicy** | `jobicy.com/api/v2/remote-jobs` | Remote jobs, last 7 days, geo/industry filters |
+| **Working Nomads** | `workingnomads.com/api/exposed_jobs/` | Curated remote jobs across categories |
+| **Remotive** | `remotive.com/api/remote-jobs` | Remote-first companies |
+| **The Muse** | `themuse.com/api/public/jobs` | US companies, category & seniority filters |
+| **Hacker News** | Algolia HN API | Monthly "Who's Hiring" thread — startups & indie |
+
+**Usage:**
+```bash
+# Search all job boards
+python3 fetch_jobs.py --job-boards all --job-board-query "python engineer"
+
+# Search specific boards
+python3 fetch_jobs.py --job-boards remoteok,himalayas,hackernews --job-board-query "react"
+
+# Combine ATS + job boards
+python3 fetch_jobs.py --platforms greenhouse,lever --job-boards remoteok,himalayas --job-board-query "backend"
+```
 
 ---
 
@@ -84,16 +109,29 @@ flowchart TD
     end
 
     subgraph Fetcher [" 2. Parallel Job Fetching Engine "]
-        GH["Greenhouse API"]
-        LV["Lever API"]
-        AB["Ashby API"]
-        WD["Workday API"]
-        SR["SmartRecruiters API"]
-        BH["BambooHR API"]
-        RC["Recruitee API"]
-        BZ["Breezy HR API"]
-        RP["Rippling API"]
-        TL["Taleo API"]
+        direction LR
+        subgraph ATS ["ATS Platforms (company-specific)"]
+            GH["Greenhouse"]
+            LV["Lever"]
+            AB["Ashby"]
+            WD["Workday"]
+            SR["SmartRecruiters"]
+            BH["BambooHR"]
+            RC["Recruitee"]
+            BZ["Breezy HR"]
+            RP["Rippling"]
+            TL["Taleo"]
+        end
+        subgraph Boards ["Job Board Aggregators (global search)"]
+            ROK["RemoteOK"]
+            HIM["Himalayas"]
+            ARB["Arbeitnow"]
+            JBC["Jobicy"]
+            WNO["Working Nomads"]
+            RMT["Remotive"]
+            TMS["The Muse"]
+            HN["Hacker News"]
+        end
         LI["LinkedIn Guest API"]
         CACHE[("Local Disk Cache\n(6h TTL)")]
     end
@@ -122,7 +160,7 @@ flowchart TD
 
     MR --> P1
     CFG --> Fetcher
-    GH & LV & AB & WD & SR & BH & RC & BZ & RP & TL & LI --> CACHE --> P1
+    ATS & Boards & LI --> CACHE --> P1
     P1 --> P2 --> RANK --> DEC
     DEC --> TAILOR
     MR --> TAILOR

@@ -56,10 +56,20 @@ End-to-end job application automation:
    - **Breezy HR**: `https://{company}.breezy.hr/json`
    - **Rippling**: `https://api.rippling.com/platform/api/ats/v2/board/{slug}/jobs`
    - **Taleo**: `https://{tenant}.taleo.net/careersection/rest/jobboard/searchjobs`
-3. **Caching**: If jobs.json is less than 6 hours old, skip fetching entirely (use `--cache-hours 0` to force refresh)
-4. User can specify target companies in `{{WORKSPACE_PATH}}/config/companies.yaml`
-5. Automatic deduplication removes same job posted on multiple boards
-6. Results saved to `{{WORKSPACE_PATH}}/output/jobs.json`
+3. Additionally, the script can search **8 job board aggregators** (no company config needed):
+   - Add `--job-boards all` (or specific: `--job-boards remoteok,himalayas,themuse`) with `--job-board-query "python engineer"`
+   - **RemoteOK**: `https://remoteok.com/api`
+   - **Himalayas**: `https://himalayas.app/jobs/api` (largest remote feed, salary data)
+   - **Arbeitnow**: `https://arbeitnow.com/api/job-board-api` (European-weighted, visa sponsorship)
+   - **Jobicy**: `https://jobicy.com/api/v2/remote-jobs` (last 7 days, geo/industry filters)
+   - **Working Nomads**: `https://www.workingnomads.com/api/exposed_jobs/`
+   - **Remotive**: `https://remotive.com/api/remote-jobs` (small feed, 24h delay)
+   - **The Muse**: `https://www.themuse.com/api/public/jobs` (US companies, category/level filters)
+   - **Hacker News**: `https://hn.algolia.com/api/v1/` (monthly "Who's Hiring" thread)
+4. **Caching**: If jobs.json is less than 6 hours old, skip fetching entirely (use `--cache-hours 0` to force refresh)
+5. User can specify target companies in `{{WORKSPACE_PATH}}/config/companies.yaml`
+6. Automatic deduplication removes same job posted on multiple boards
+7. Results saved to `{{WORKSPACE_PATH}}/output/jobs.json`
 
 ### Step 3: Filter + Score Jobs Against Resume
 1. Run:
