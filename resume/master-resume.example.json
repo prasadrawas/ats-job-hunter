@@ -1,0 +1,87 @@
+{
+  "$schema": "https://raw.githubusercontent.com/jsonresume/resume-schema/v1.0.0/schema.json",
+  "basics": {
+    "name": "Your Name",
+    "label": "Your Title | e.g. Senior Full Stack Engineer",
+    "email": "your.email@example.com",
+    "phone": "+1 555-000-0000",
+    "careerStartDate": "2020-01-01",
+    "summary": "Your professional summary here. Include years of experience, key technologies, domains, and top quantified achievements.",
+    "location": {
+      "city": "Your City",
+      "region": "",
+      "countryCode": "US"
+    },
+    "profiles": [
+      {
+        "network": "LinkedIn",
+        "username": "yourname",
+        "url": "https://www.linkedin.com/in/yourname"
+      },
+      {
+        "network": "GitHub",
+        "username": "yourname",
+        "url": "https://github.com/yourname"
+      },
+      {
+        "network": "Portfolio",
+        "url": "https://yourportfolio.com"
+      }
+    ]
+  },
+  "skills": [
+    {
+      "name": "Languages",
+      "keywords": ["Python", "TypeScript", "JavaScript"]
+    },
+    {
+      "name": "Frontend",
+      "keywords": ["React", "Next.js", "Tailwind CSS"]
+    },
+    {
+      "name": "Backend",
+      "keywords": ["FastAPI", "Node.js", "PostgreSQL"]
+    }
+  ],
+  "work": [
+    {
+      "company": "Company Name",
+      "position": "Your Role",
+      "location": "City, Country",
+      "startDate": "2022-01-01",
+      "endDate": "",
+      "summary": "Brief description of your role and scope.",
+      "highlights": [
+        "Accomplished [X] as measured by [Y], by doing [Z]",
+        "Led/Built/Designed [project] resulting in [metric]"
+      ]
+    }
+  ],
+  "projects": [
+    {
+      "name": "Project Name",
+      "description": "What this project does and your role.",
+      "keywords": ["Tech1", "Tech2"],
+      "url": "",
+      "highlights": [
+        "Key achievement with metrics",
+        "Technical detail showing depth"
+      ]
+    }
+  ],
+  "education": [
+    {
+      "institution": "University Name",
+      "area": "Computer Science",
+      "studyType": "B.S.",
+      "startDate": "2016-01-01",
+      "endDate": "2020-01-01",
+      "location": "City, State"
+    }
+  ],
+  "_metadata": {
+    "version": "1.0.0",
+    "lastUpdated": "2026-01-01",
+    "source": "Fill this with your complete experience — it is the superset from which tailored resumes are generated"
+  }
+}

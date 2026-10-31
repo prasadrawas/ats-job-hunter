@@ -1,0 +1,27 @@
+# Target companies by ATS platform
+#
+# SETUP: Copy this file to companies.yaml and add your target companies
+#   cp config/companies.example.yaml config/companies.yaml
+#
+# Find board tokens/slugs from company career page URLs:
+#   Greenhouse: https://boards.greenhouse.io/COMPANY → token is "COMPANY"
+#   Lever: https://jobs.lever.co/COMPANY → slug is "COMPANY"
+#   Ashby: https://jobs.ashbyhq.com/COMPANY → slug is "COMPANY"
+
+greenhouse:
+  # Board tokens - found in the company's Greenhouse job board URL
+  # - stripe
+  # - figma
+  # - datadog
+  []
+
+lever:
+  # Company slugs - found in the Lever job board URL
+  # - palantir
+  []
+
+ashby:
+  # Board slugs - found in the Ashby job board URL
+  # - notion
+  # - linear
+  []

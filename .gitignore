@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.pyc
+
+# Output (regenerated on each run)
+output/
+
+# User-specific config (contains personal data)
+config/answers.yaml
+config/preferences.yaml
+config/companies.yaml
+resume/master-resume.json
+
+# LinkedIn cache
+.agents/skills/ats-job-hunter/output/
+
+# OS
+.DS_Store
+
+# LaTeX artifacts
+*.aux
+*.log
+*.out
+*.synctex.gz
+
+# Environment variables & secrets
+.env
+.env.*
+!.env.example
+
+# Scratch / temp
+scratch/

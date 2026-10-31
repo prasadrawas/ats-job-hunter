@@ -1,0 +1,108 @@
+% ATS-Friendly Resume Template
+% Rules: Single column, no tables, no graphics, no headers/footers
+% Contact info in body, standard section headings, 10-12pt body text
+% Fonts: Computer Modern (LaTeX default) - ATS-safe, universally embedded
+%
+% ATS Parse Compatibility:
+%   Greenhouse (Apache Tika): sequential left-to-right
+%   Workday (NLP stripper): plain text survives
+%   Lever (pattern-matching): standard headings
+%   Ashby (ML-assisted): clean structure
+%   iCIMS (Apache Tika): Unicode-safe fonts
+
+\documentclass[11pt,a4paper]{article}
+
+% Margins
+\usepackage[top=0.5in, bottom=0.5in, left=0.65in, right=0.65in]{geometry}
+
+% Encoding
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+
+% Clean spacing
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{parskip}
+\usepackage{hyperref}
+
+% Hyperlink styling - ATS safe, no colored boxes
+\hypersetup{
+    colorlinks=true,
+    linkcolor=black,
+    urlcolor=black,
+    pdfborder={0 0 0}
+}
+
+% No page numbers (ATS sometimes misparses them)
+\pagestyle{empty}
+
+% Remove default paragraph indent and set paragraph spacing
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0pt}
+
+% Section heading format - line BELOW heading text, with proper spacing
+\titleformat{\section}
+  {\vspace{0.6em}\large\bfseries\uppercase}
+  {}
+  {0em}
+  {}
+  [\vspace{0.15em}\hrule]
+
+\titlespacing*{\section}{0pt}{0.4em}{0.5em}
+
+% Tight bullet lists - no tables, just clean indented bullets
+\setlist[itemize]{
+  topsep=3pt,
+  itemsep=1pt,
+  parsep=0pt,
+  leftmargin=1.5em,
+  label=\textbullet
+}
+
+% Custom commands for consistent formatting
+\newcommand{\resumename}[1]{{\LARGE\bfseries #1}}
+\newcommand{\jobtitle}[4]{%
+  {\textbf{#1} \hfill #2}\\%
+  {\textit{#3} \hfill #4}%
+  \vspace{0.2em}%
+}
+\newcommand{\projecttitle}[2]{%
+  {\textbf{#1}}\\%
+  {\small\textit{Technologies: #2}}%
+  \vspace{0.2em}%
+}
+\newcommand{\edutitle}[4]{%
+  {\textbf{#1} \hfill #2}\\%
+  {\textit{#3} \hfill #4}%
+  \vspace{0.2em}%
+}
+
+\begin{document}
+
+% ===== HEADER: Name + Contact (clean, compact, single-line links) =====
+\begin{center}
+  \resumename{<<NAME>>}\\[0.35em]
+  <<EMAIL>> \enspace $\cdot$ \enspace <<PHONE>> \enspace $\cdot$ \enspace <<LOCATION>>\\[0.1em]
+  <<LINKEDIN_DISPLAY>> \enspace $\cdot$ \enspace <<GITHUB_DISPLAY>> \enspace $\cdot$ \enspace <<PORTFOLIO_DISPLAY>>
+\end{center}
+
+% ===== SUMMARY =====
+\section{Summary}
+<<SUMMARY>>
+
+% ===== TECHNICAL SKILLS =====
+\section{Technical Skills}
+<<SKILLS>>
+
+% ===== WORK EXPERIENCE =====
+\section{Work Experience}
+<<WORK_EXPERIENCE>>
+
+% ===== PROJECTS =====
+<<PROJECTS_SECTION>>
+
+% ===== EDUCATION =====
+\section{Education}
+<<EDUCATION>>
+
+\end{document}

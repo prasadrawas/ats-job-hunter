@@ -1,0 +1,171 @@
+# =============================================================================
+# Standard Application Question Answers
+# Pre-configured answers for common ATS questions so you don't re-type them
+# Custom/open-ended questions are answered by Gemini AI using your resume
+#
+# SETUP: Copy this file to answers.yaml and fill in your values
+#   cp config/answers.example.yaml config/answers.yaml
+# =============================================================================
+
+# ---------- Personal Info (auto-filled from master-resume.json) ----------
+# These are pulled from resume basics — no need to configure here
+# Name, email, phone, location are extracted automatically
+
+# ---------- Work Authorization ----------
+work_authorization:
+  # "Are you legally authorized to work in [country]?"
+  authorized_india: false
+  authorized_us: true
+  authorized_eu: false
+  authorized_uk: false
+
+  # "Will you now or in the future require sponsorship?"
+  requires_sponsorship: false
+
+  # "Do you have a valid work visa?"
+  has_visa: false
+  visa_type: ""
+
+# ---------- Location & Relocation ----------
+relocation:
+  # "Are you willing to relocate?"
+  willing_to_relocate: true
+
+  # Cities willing to relocate to
+  willing_to_relocate_to: "San Francisco, New York, Seattle"
+
+  # "Where are you currently located?"
+  current_location: "San Francisco, CA"
+
+  # "What is your preferred work arrangement?"
+  preferred_work_mode: "Remote"  # "Remote", "Hybrid", "Onsite", "Flexible"
+
+# ---------- Experience ----------
+experience:
+  # "How many years of professional experience do you have?"
+  # Auto-calculated from careerStartDate, but fallback here
+  years: 5
+
+  # "How many years of experience do you have with [X]?"
+  # Map specific skills to years of experience
+  skill_years:
+    Python: 3
+    TypeScript: 3
+    JavaScript: 5
+    React: 3
+    # Add your skills and years here
+
+# ---------- Salary ----------
+salary:
+  # Current salary (set to empty string to skip)
+  current_usd: ""
+
+  # Expected salary — Gemini picks the right one based on job location
+  expectation: "Negotiable based on total compensation"
+
+  # Minimum acceptable
+  minimum_usd: 0
+
+# ---------- Availability ----------
+availability:
+  # "What is your earliest start date?"
+  earliest_start: "2 weeks"
+
+  # "Are you available for a phone screen this week?"
+  available_for_screen: true
+
+  # Notice period at current job
+  notice_period: "2 weeks"
+
+# ---------- Education ----------
+education:
+  # "What is your highest level of education?"
+  highest_degree: "Bachelor's"
+
+  # "Did you graduate?"
+  graduated: true
+
+  # "What was your GPA?" (leave empty to skip)
+  gpa: ""
+
+# ---------- Diversity / EEO ----------
+# These are OPTIONAL and self-reported. Set to empty to decline.
+eeo:
+  gender: ""
+  race: ""
+  veteran: ""
+  disability: ""
+
+# ---------- Languages ----------
+languages:
+  spoken: "English"
+  proficient: "English"
+
+# ---------- Background & Employment ----------
+background:
+  pass_background_check: true
+  currently_employed: true
+  previously_applied: false
+  require_accommodations: false
+  timezone: "PST (UTC-8)"
+
+# ---------- Links ----------
+links:
+  linkedin: "https://www.linkedin.com/in/yourname"
+  github: "https://github.com/yourname"
+  portfolio: ""
+  # Additional links (e.g., blog, Twitter/X, Stack Overflow)
+  additional: {}
+
+# ---------- Custom Patterns ----------
+# Pattern-matching rules for common question types
+# Format: list of {pattern: "regex", answer: "value"}
+# Matched case-insensitively against question label/text
+patterns:
+  - pattern: "how did you hear about"
+    answer: "Company careers page"
+
+  - pattern: "referred by|referral"
+    answer: ""  # empty = no referral
+
+  - pattern: "cover letter"
+    answer: "__COVER_LETTER__"  # special token: auto-fills from generated cover letter
+
+  - pattern: "why .* (company|role|position|interested)"
+    answer: "__GEMINI__"  # special token: Gemini generates contextual answer
+
+  - pattern: "tell .* about yourself|describe yourself"
+    answer: "__GEMINI__"
+
+  - pattern: "biggest (challenge|achievement|accomplishment)"
+    answer: "__GEMINI__"
+
+  - pattern: "what makes you .* (fit|candidate|qualified)"
+    answer: "__GEMINI__"
+
+  - pattern: "agree to .* (terms|privacy|conditions|policy)"
+    answer: true
+
+  - pattern: "consent .* (data|processing|collection)"
+    answer: true
+
+  - pattern: "18 years .* (old|age)|legal age"
+    answer: true
+
+  - pattern: "language.* (speak|spoken|proficien|know)"
+    answer: "English"
+
+  - pattern: "background check|criminal"
+    answer: "Yes"
+
+  - pattern: "currently employed|presently (employed|working)"
+    answer: "Yes"
+
+  - pattern: "previously (applied|worked)|applied before"
+    answer: "No"
+
+  - pattern: "accommodat|special (needs|requirements)"
+    answer: "No"
+
+  - pattern: "time.?zone|time zone"
+    answer: "PST (UTC-8)"

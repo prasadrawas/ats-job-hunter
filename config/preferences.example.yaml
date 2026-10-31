@@ -1,0 +1,142 @@
+# =============================================================================
+# Job Search Preferences — Used by fetch_jobs.py and score_jobs.py
+#
+# SETUP: Copy this file to preferences.yaml and customize for your job search
+#   cp config/preferences.example.yaml config/preferences.yaml
+# =============================================================================
+
+# ---------- Location ----------
+location:
+  # STRICT mode: set to false to allow global/remote roles from target companies
+  strict: false
+
+  # Allowed locations (case-insensitive, partial match)
+  # Jobs must match at least ONE of these to be included
+  allowed:
+    - "San Francisco"
+    - "New York"
+    - "Seattle"
+    - "Remote"
+    # Add your preferred locations
+
+  # Exclude jobs with these locations even if they match above
+  excluded: []
+    # - "US Only"
+
+# ---------- Roles ----------
+roles:
+  # Target job titles (partial match, case-insensitive)
+  # Jobs matching ANY of these are included
+  target_titles:
+    - "Software Engineer"
+    - "Software Developer"
+    - "Full Stack"
+    - "Backend Engineer"
+    - "Frontend Engineer"
+    # Add your target titles
+
+  # Seniority levels to include (partial match)
+  # Leave empty to accept all levels
+  seniority: []
+    # - "Senior"
+    # - "Staff"
+    # - "Lead"
+    # - "Junior"
+
+  # Exclude jobs with these keywords in title
+  excluded_titles:
+    - "Director"
+    - "VP"
+    - "Vice President"
+    - "Recruiter"
+    - "Sales"
+    - "Marketing"
+    - "HR"
+
+# ---------- Experience ----------
+experience:
+  # Your total years (auto-calculated from master-resume.json careerStartDate)
+  # Only used as fallback if careerStartDate is missing
+  years: 5
+
+  # Max years required in JD to still apply (filters out "10+ years" jobs)
+  max_required_years: 10
+
+  # Min years required in JD (filters out junior roles)
+  min_required_years: 0
+
+# ---------- Salary ----------
+salary:
+  # Minimum salary (USD) — jobs below this are deprioritized (not excluded)
+  # Set to 0 to disable
+  min_usd: 0
+
+  # Currency preference for display
+  currency: "USD"
+
+# ---------- Keywords ----------
+keywords:
+  # Must-have: at least ONE of these must appear in the JD
+  # Leave empty to disable
+  must_have_any: []
+    # - "Python"
+    # - "React"
+
+  # Boost: jobs with these keywords get a score boost
+  boost: []
+    # - "Python"
+    # - "React"
+    # - "TypeScript"
+    # - "AWS"
+
+  # Exclude: jobs with ANY of these keywords are excluded
+  exclude: []
+    # - "Clearance Required"
+    # - "US Citizens Only"
+
+# ---------- Companies ----------
+companies:
+  # Exclude specific companies (exact match on company_token)
+  excluded: []
+
+  # Priority companies (get a score boost)
+  priority: []
+    # - "stripe"
+    # - "figma"
+
+# ---------- Departments ----------
+departments:
+  # Only include jobs from these departments (partial match)
+  # Leave empty to accept all
+  included: []
+
+  # Exclude these departments
+  excluded:
+    - "Sales"
+    - "Marketing"
+    - "HR"
+    - "Finance"
+    - "Legal"
+
+# ---------- Scoring ----------
+scoring:
+  # Minimum match score (0-100) to include in results
+  min_score: 30
+
+  # Score boost for priority companies (added to final score)
+  priority_company_boost: 10
+
+  # Score boost for keyword matches (added per matching boost keyword)
+  keyword_boost: 2
+
+  # Use Gemini AI for scoring (more accurate but slower and uses API quota)
+  # Set to false to use fast TF-IDF scoring only
+  use_gemini: true
+
+  # Max jobs to send to Gemini for scoring (to control API costs)
+  # Jobs are pre-filtered first, then top N by TF-IDF go to Gemini
+  gemini_max_jobs: 15
+
+  # Jobs per Gemini API call (resume sent once per batch, not per job)
+  # Higher = fewer API calls = less tokens. 5 is a good balance.
+  gemini_jobs_per_batch: 5
