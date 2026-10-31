@@ -3,25 +3,68 @@
 # SETUP: Copy this file to companies.yaml and add your target companies
 #   cp config/companies.example.yaml config/companies.yaml
 #
-# Find board tokens/slugs from company career page URLs:
-#   Greenhouse: https://boards.greenhouse.io/COMPANY → token is "COMPANY"
-#   Lever: https://jobs.lever.co/COMPANY → slug is "COMPANY"
-#   Ashby: https://jobs.ashbyhq.com/COMPANY → slug is "COMPANY"
+# How to find board tokens/slugs from company career page URLs:
+#
+#   Greenhouse:      https://boards.greenhouse.io/COMPANY          → token: "COMPANY"
+#   Lever:           https://jobs.lever.co/COMPANY                 → slug: "COMPANY"
+#   Ashby:           https://jobs.ashbyhq.com/COMPANY              → slug: "COMPANY"
+#   Workday:         https://COMPANY.wd5.myworkdayjobs.com/SITE    → slug: "COMPANY.wd5/SITE"
+#   SmartRecruiters: https://careers.smartrecruiters.com/COMPANY    → slug: "COMPANY"
+#   BambooHR:        https://COMPANY.bamboohr.com/careers           → slug: "COMPANY"
+#   Recruitee:       https://COMPANY.recruitee.com/                 → slug: "COMPANY"
+#   Breezy HR:       https://COMPANY.breezy.hr/                     → slug: "COMPANY"
+#   Rippling:        https://ats.rippling.com/COMPANY/jobs          → slug: "COMPANY"
+#   Taleo:           https://TENANT.taleo.net/careersection/CS/...  → slug: "TENANT/CS"
 
 greenhouse:
-  # Board tokens - found in the company's Greenhouse job board URL
   # - stripe
   # - figma
   # - datadog
   []
 
 lever:
-  # Company slugs - found in the Lever job board URL
   # - palantir
   []
 
 ashby:
-  # Board slugs - found in the Ashby job board URL
   # - notion
   # - linear
+  []
+
+workday:
+  # Format: "tenant.wdN/site" — both parts come from the careers URL
+  # e.g. https://netflix.wd5.myworkdayjobs.com/External → "netflix.wd5/External"
+  # - netflix.wd5/External
+  # - salesforce.wd12/External_Career_Site
+  []
+
+smartrecruiters:
+  # Company identifier from careers.smartrecruiters.com/COMPANY
+  # - Visa
+  # - Spotify
+  []
+
+bamboohr:
+  # Subdomain from COMPANY.bamboohr.com/careers
+  # - mycompany
+  []
+
+recruitee:
+  # Subdomain from COMPANY.recruitee.com
+  # - mycompany
+  []
+
+breezyhr:
+  # Subdomain from COMPANY.breezy.hr
+  # - mycompany
+  []
+
+rippling:
+  # Slug from the Rippling careers URL
+  # - mycompany
+  []
+
+taleo:
+  # Format: "tenant/careersection" — from TENANT.taleo.net/careersection/CS/...
+  # - drhorton/2
   []
